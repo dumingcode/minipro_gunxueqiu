@@ -3,7 +3,7 @@
 const Utils = require('../../utils/util.js')
 const API = require('../../config/api.js')
 const app = getApp()
-
+const user = require('../../services/user.js')
 Page({
   data: {
     motto: '滚雪球',
@@ -16,21 +16,27 @@ Page({
       url: '../logs/logs'
     })
   },
-  onLoad: function () {
-    if (app.globalData.userInfo && app.globalData.token) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    }
+  onLoad: async function () {
+    
   },
-  getUserInfo: function (e) {
-    console.log(e)
+  getUserInfo: async function (e) {
     app.globalData.userInfo = e.detail.userInfo
     this.setData({
       userInfo: e.detail.userInfo,
       hasUserInfo: true
     })
+    if (!wx.getStorageSync('userInfo') || !wx.getStorageSync('token')) {
+      await user.loginByWeixin()
+    }
+    app.globalData.userInfo = JSON.parse(wx.getStorageSync('userInfo') || '')
+    app.globalData.token = wx.getStorageSync('token') || ''
+    if (app.globalData.userInfo && app.globalData.token) {
+      this.setData({
+        userInfo: app.globalData.userInfo,
+        hasUserInfo: true,
+        token: app.globalData.token
+      })
+    }
   },
   getStockInfo: async function (e) {
     console.log(e)
